@@ -1,8 +1,8 @@
 
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../App';
+import { AppContext } from '../../types';
 import type { Job } from '../../types';
-import { JobStatus } from '../../types';
+import { JobStatus, VerificationStatus } from '../../types';
 import JobCard from '../shared/JobCard';
 
 const ProviderDashboard: React.FC = () => {
@@ -16,14 +16,35 @@ const ProviderDashboard: React.FC = () => {
 
   const jobsToDisplay = filter === 'available' ? availableJobs : myJobs;
 
+  const renderVerificationBanner = () => {
+    if (!currentUser || currentUser.verificationStatus === VerificationStatus.Verified || currentUser.verificationStatus === VerificationStatus.NotApplicable) {
+        return null;
+    }
+
+    if (currentUser.verificationStatus === VerificationStatus.Pending) {
+        return (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-md" role="alert">
+                <p className="font-bold">Verification Pending</p>
+                <p>Your documents are under review. You can browse available jobs, but you will need to be verified to accept them. You'll be notified once your account is approved.</p>
+            </div>
+        );
+    }
+    
+    if (currentUser.verificationStatus === VerificationStatus.Rejected) {
+        return (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert">
+                <p className="font-bold">Verification Rejected</p>
+                <p>There was an issue with your submitted documents. Please check your email for more details and instructions on how to re-submit your information.</p>
+            </div>
+        );
+    }
+
+    return null;
+  }
+
   return (
     <div className="container mx-auto">
-       {!currentUser.isVerified && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-md" role="alert">
-          <p className="font-bold">Verification Pending</p>
-          <p>Your documents are under review. You can browse available jobs, but you will need to be verified to accept them. You'll be notified once your account is approved.</p>
-        </div>
-      )}
+      {renderVerificationBanner()}
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold">Job Dashboard</h2>

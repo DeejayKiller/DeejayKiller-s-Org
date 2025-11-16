@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface GDPRProps {
@@ -13,7 +12,7 @@ const GDPR: React.FC<GDPRProps> = ({ onBack }) => {
             <p className="text-sm text-slate-500">Last updated: {new Date().toLocaleDateString()}</p>
 
             <h2 className="text-2xl font-bold mt-6">Introduction</h2>
-            <p>CleanSweep ("we," "our," or "us") is committed to protecting and respecting your privacy. This GDPR Compliance Statement explains how we collect, process, and protect personal data in compliance with the General Data Protection Regulation (GDPR).</p>
+            <p>SwiftClean ("we," "our," or "us") is committed to protecting and respecting your privacy. This GDPR Compliance Statement explains how we collect, process, and protect personal data in compliance with the General Data Protection Regulation (GDPR).</p>
 
             <h2 className="text-2xl font-bold mt-6">Data We Collect</h2>
             <p>We may collect and process the following data about you:</p>
@@ -26,7 +25,7 @@ const GDPR: React.FC<GDPRProps> = ({ onBack }) => {
             </ul>
 
             <h2 className="text-2xl font-bold mt-6">How We Use Your Data</h2>
-            <p>We use your personal data to operate, maintain, and provide you with the features and functionality of the CleanSweep platform. This includes:</p>
+            <p>We use your personal data to operate, maintain, and provide you with the features and functionality of the SwiftClean platform. This includes:</p>
             <ul>
                 <li>Registering you as a new user.</li>
                 <li>Connecting customers with service providers.</li>
@@ -58,7 +57,7 @@ const GDPR: React.FC<GDPRProps> = ({ onBack }) => {
             <p>We have implemented appropriate security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way. Access to your personal data is limited to those employees and third parties who have a business need to know.</p>
 
             <h2 className="text-2xl font-bold mt-6">Contact Us</h2>
-            <p>If you have any questions about this GDPR Compliance Statement or our data protection practices, please contact us at <a href="mailto:privacy@cleansweep.com" className="text-blue-600 hover:underline">privacy@cleansweep.com</a>.</p>
+            <p>If you have any questions about this GDPR Compliance Statement or our data protection practices, please contact us at <a href="mailto:privacy@swiftclean.com" className="text-blue-600 hover:underline">privacy@swiftclean.com</a>.</p>
         </div>
 
       <div className="text-center">

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface LandingPageProps {
@@ -11,7 +10,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)]">
       <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-lg mx-auto">
         <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-        <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Welcome to CleanSweep</h1>
+        <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Welcome to SwiftClean</h1>
         <p className="text-slate-600 mb-8 text-lg">Your one-stop solution for professional cleaning services. Find trusted cleaners or offer your services today.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button

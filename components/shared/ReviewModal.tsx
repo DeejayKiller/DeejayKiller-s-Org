@@ -1,6 +1,6 @@
 
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../App';
+import { AppContext } from '../../types';
 import type { Job } from '../../types';
 import { UserType } from '../../types';
 import StarRating from './StarRating';

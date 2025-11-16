@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import type { Job, User } from './types';
-import { JobStatus, UserType } from './types';
+import { AppContext, View, JobStatus, UserType, VerificationStatus } from './types';
 import { MOCK_JOBS, MOCK_USERS } from './constants';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -10,40 +9,16 @@ import CustomerDashboard from './components/dashboards/CustomerDashboard';
 import ProviderDashboard from './components/dashboards/ProviderDashboard';
 import LandingPage from './components/auth/LandingPage';
 import GDPR from './components/legal/GDPR';
-
-type View = 'landing' | 'login' | 'register' | 'gdpr';
-
-export const AppContext = React.createContext<{
-  currentUser: User | null;
-  users: User[];
-  jobs: Job[];
-  login: (email: string) => void;
-  logout: () => void;
-  register: (user: Omit<User, 'id' | 'avgRating' | 'ratingsCount' | 'isVerified'>) => void;
-  createJob: (job: Omit<Job, 'id' | 'status' | 'customerId'>) => void;
-  updateJob: (updatedJob: Job) => void;
-  submitReview: (jobId: number, reviewerId: number, rating: number, reviewText: string) => void;
-  findUserById: (id: number) => User | undefined;
-  setView: (view: View) => void;
-}>({
-  currentUser: null,
-  users: [],
-  jobs: [],
-  login: () => {},
-  logout: () => {},
-  register: () => {},
-  createJob: () => {},
-  updateJob: () => {},
-  submitReview: () => {},
-  findUserById: () => undefined,
-  setView: () => {},
-});
+import ServicesPage from './components/services/ServicesPage';
+import UserSettingsPage from './components/settings/UserSettingsPage';
+import NotificationsPage from './components/notifications/NotificationsPage';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS);
   const [currentView, setCurrentView] = useState<View>('landing');
+  const [bookingService, setBookingService] = useState<string | null>(null);
 
   const appContextValue = useMemo(() => ({
     currentUser,
@@ -61,13 +36,14 @@ const App: React.FC = () => {
       setCurrentUser(null);
       setCurrentView('landing');
     },
-    register: (user: Omit<User, 'id' | 'avgRating' | 'ratingsCount' | 'isVerified'>) => {
+    register: (user: Omit<User, 'id' | 'avgRating' | 'ratingsCount' | 'verificationStatus' | 'isAvailable'>) => {
       const newUser: User = {
         ...user,
         id: users.length + 1,
         avgRating: 0,
         ratingsCount: 0,
-        isVerified: user.userType === UserType.Customer, // Customers are auto-verified, providers are not
+        verificationStatus: user.userType === UserType.Provider ? VerificationStatus.Pending : VerificationStatus.NotApplicable,
+        isAvailable: user.userType === UserType.Provider ? true : undefined,
       };
       setUsers(prev => [...prev, newUser]);
       setCurrentUser(newUser);
@@ -85,54 +61,60 @@ const App: React.FC = () => {
     updateJob: (updatedJob: Job) => {
         setJobs(prev => prev.map(job => job.id === updatedJob.id ? updatedJob : job));
     },
+    updateUser: (updatedUser: User) => {
+        setUsers(prev => prev.map(user => user.id === updatedUser.id ? updatedUser : user));
+        if (currentUser && currentUser.id === updatedUser.id) {
+            setCurrentUser(updatedUser);
+        }
+    },
     submitReview: (jobId: number, reviewerId: number, rating: number, reviewText: string) => {
-        const job = jobs.find(j => j.id === jobId);
-        if (!job) return;
-        
+        const jobToUpdate = jobs.find(j => j.id === jobId);
+        if (!jobToUpdate) { return; }
         const reviewer = users.find(u => u.id === reviewerId);
-        if (!reviewer) return;
-        
+        if (!reviewer) { return; }
         const isCustomerReviewing = reviewer.userType === UserType.Customer;
-        const revieweeId = isCustomerReviewing ? job.providerId : job.customerId;
-        if (!revieweeId) return;
+        const revieweeId = isCustomerReviewing ? jobToUpdate.providerId : jobToUpdate.customerId;
+        if (!revieweeId) { return; }
 
-        // Update Job
-        const updatedJob: Job = {
-            ...job,
-            status: JobStatus.Reviewed,
-            ...(isCustomerReviewing 
-                ? { providerRating: rating, providerReview: reviewText } 
-                : { customerRating: rating, customerReview: reviewText })
-        };
-        setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? updatedJob : j));
+        const updatedJob: Job = { ...jobToUpdate, status: JobStatus.Reviewed };
+        if (isCustomerReviewing) {
+            updatedJob.providerRating = rating;
+            updatedJob.providerReview = reviewText;
+        } else {
+            updatedJob.customerRating = rating;
+            updatedJob.customerReview = reviewText;
+        }
+        setJobs(prevJobs => prevJobs.map(j => (j.id === jobId ? updatedJob : j)));
 
-        // Update Reviewee's Rating
         const reviewee = users.find(u => u.id === revieweeId);
         if (reviewee) {
-            const totalRating = (reviewee.avgRating * reviewee.ratingsCount) + rating;
-            const newRatingsCount = reviewee.ratingsCount + 1;
-            const newAvgRating = totalRating / newRatingsCount;
-            
-            const updatedUser: User = {
+            const totalRatingValue = (reviewee.avgRating * reviewee.ratingsCount) + rating;
+            const newTotalRatings = reviewee.ratingsCount + 1;
+            const newAverageRating = totalRatingValue / newTotalRatings;
+            const updatedReviewee: User = {
                 ...reviewee,
-                avgRating: parseFloat(newAvgRating.toFixed(2)),
-                ratingsCount: newRatingsCount
+                avgRating: parseFloat(newAverageRating.toFixed(2)),
+                ratingsCount: newTotalRatings,
             };
-            setUsers(prevUsers => prevUsers.map(u => u.id === revieweeId ? updatedUser : u));
-
-            // Also update current user if they are the one being reviewed
+            setUsers(prevUsers => prevUsers.map(u => (u.id === revieweeId ? updatedReviewee : u)));
             if (currentUser && currentUser.id === revieweeId) {
-                setCurrentUser(updatedUser);
+                setCurrentUser(updatedReviewee);
             }
         }
     },
     findUserById: (id: number) => users.find(u => u.id === id),
     setView: setCurrentView,
-  }), [currentUser, users, jobs]);
+    bookingService,
+    setBookingService,
+  }), [currentUser, users, jobs, bookingService]);
 
   const renderContent = () => {
-    if (currentView === 'gdpr') {
-        return <GDPR onBack={() => setCurrentView('landing')} />;
+    switch (currentView) {
+        // FIX: Replaced undefined 'setView' with 'setCurrentView' state setter.
+        case 'gdpr': return <GDPR onBack={() => setCurrentView(currentUser ? (currentUser.userType === UserType.Customer ? 'landing' : 'landing') : 'landing')} />;
+        case 'services': return <ServicesPage />;
+        case 'settings': return <UserSettingsPage />;
+        case 'notifications': return <NotificationsPage />;
     }
       
     if (currentUser) {

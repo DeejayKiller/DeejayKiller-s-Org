@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../App';
+import { AppContext } from '../../types';
 import ForgotPasswordModal from './ForgotPasswordModal';
 import ResetPasswordModal from './ResetPasswordModal';
 
@@ -44,7 +44,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     <>
       <div className="max-w-md mx-auto mt-10">
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg space-y-6">
-          <h2 className="text-3xl font-bold text-center text-slate-800">Login to CleanSweep</h2>
+          <h2 className="text-3xl font-bold text-center text-slate-800">Login to SwiftClean</h2>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email Address</label>
             <input

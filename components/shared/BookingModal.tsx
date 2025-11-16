@@ -1,6 +1,5 @@
-
-import React, { useState, useContext } from 'react';
-import { AppContext } from '../../App';
+import React, { useState, useContext, useEffect } from 'react';
+import { AppContext } from '../../types';
 import type { Job } from '../../types';
 import { PaymentMethod } from '../../types';
 import { CLEANING_SERVICES } from '../../constants';
@@ -10,15 +9,32 @@ interface BookingModalProps {
 }
 
 const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
-  const { createJob } = useContext(AppContext);
-  const [serviceType, setServiceType] = useState(CLEANING_SERVICES[0].name);
+  const { createJob, bookingService, setBookingService } = useContext(AppContext);
+  const [serviceType, setServiceType] = useState(bookingService || CLEANING_SERVICES[0].name);
   const [address, setAddress] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('09:00');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.Card);
+  const [imageFile, setImageFile] = useState<File | undefined>();
+
+  useEffect(() => {
+    // When the modal closes, reset the global booking service state
+    return () => {
+        if(bookingService) {
+            setBookingService(null);
+        }
+    }
+  }, [bookingService, setBookingService]);
+
 
   const selectedService = CLEANING_SERVICES.find(s => s.name === serviceType);
   const price = selectedService ? selectedService.price : 0;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +48,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
         dateTime: new Date(`${date}T${time}`),
         price,
         paymentMethod,
+        imageFile
     };
     createJob(newJob);
     onClose();
@@ -40,7 +57,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg relative animate-fade-in-up">
-        <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600">&times;</button>
+        <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
         <h2 className="text-2xl font-bold mb-6 text-slate-800">Book a Cleaning Service</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -65,9 +82,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
             </div>
           </div>
            <div>
+            <label htmlFor="imageUpload" className="block text-sm font-medium text-slate-700">Upload Image (Optional)</label>
+            <p className="text-xs text-slate-500 mt-1 mb-2">Show the provider what needs cleaning.</p>
+            <input type="file" id="imageUpload" onChange={handleFileChange} accept="image/*" className="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+            {imageFile && <p className="text-xs text-green-600 mt-1">{imageFile.name} uploaded.</p>}
+           </div>
+           <div>
             <label className="block text-sm font-medium text-slate-700">Payment Method</label>
             <div className="mt-2 flex space-x-4">
-                {Object.values(PaymentMethod).map(method => (
+                {Object.values(PaymentMethod).filter(m => m !== PaymentMethod.Crypto).map(method => (
                     <label key={method} className="flex items-center">
                         <input type="radio" name="payment" value={method} checked={paymentMethod === method} onChange={() => setPaymentMethod(method)} className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"/>
                         <span className="ml-2 text-sm text-slate-700">{method}</span>

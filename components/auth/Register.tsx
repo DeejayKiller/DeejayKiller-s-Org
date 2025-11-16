@@ -1,6 +1,5 @@
-
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../App';
+import { AppContext } from '../../types';
 import type { User } from '../../types';
 import { UserType } from '../../types';
 
@@ -29,7 +28,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         alert("Passport and DBS checks are required for service providers.");
         return;
     }
-    const newUser: Omit<User, 'id' | 'avgRating' | 'ratingsCount' | 'isVerified'> = {
+    const newUser: Omit<User, 'id' | 'avgRating' | 'ratingsCount' | 'verificationStatus' | 'isAvailable'> = {
         name,
         email,
         userType,
@@ -105,7 +104,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   return (
     <div className="max-w-md mx-auto mt-10">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Join CleanSweep</h2>
+        <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Join SwiftClean</h2>
         <div className="w-full bg-gray-200 rounded-full h-1.5 mb-6">
             <div className="bg-blue-600 h-1.5 rounded-full" style={{width: `${step*50}%`}}></div>
         </div>
