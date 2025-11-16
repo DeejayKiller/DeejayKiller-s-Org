@@ -5,23 +5,33 @@ import { UserType } from '../../types';
 import StarRating from '../shared/StarRating';
 
 const Header: React.FC = () => {
-  const { currentUser, logout } = useContext(AppContext);
+  const { currentUser, logout, setView } = useContext(AppContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = ['Home', 'Products', 'Services', 'Contact', 'GDPR'];
+  
+  const handleNavClick = (item: string) => {
+      if(item.toLowerCase() === 'gdpr') {
+          setView('gdpr');
+      } else {
+          // All other items go to the main view
+          setView('landing');
+      }
+      setIsMenuOpen(false);
+  }
 
   return (
     <header className="bg-white shadow-md relative">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setView('landing')}>
              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
             <h1 className="text-2xl font-bold text-slate-800">CleanSweep</h1>
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
             {menuItems.map(item => (
-              <a key={item} href="#" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+              <a key={item} href="#" onClick={(e) => { e.preventDefault(); handleNavClick(item);}} className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
                 {item}
               </a>
             ))}
@@ -78,7 +88,7 @@ const Header: React.FC = () => {
         <div className="md:hidden bg-white shadow-lg">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
              {menuItems.map(item => (
-              <a key={item} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">
+              <a key={item} href="#" onClick={(e) => { e.preventDefault(); handleNavClick(item);}} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">
                 {item}
               </a>
             ))}
@@ -92,8 +102,15 @@ const Header: React.FC = () => {
                        </div>
                     </div>
                     <div className="ml-3">
-                        <div className="text-base font-medium leading-none text-slate-800">{currentUser.name}</div>
-                        <div className="text-sm font-medium leading-none text-slate-500">{currentUser.email}</div>
+                      <div className="flex items-center gap-1.5 mb-1">
+                          {currentUser.userType === UserType.Provider && currentUser.isVerified && (
+                              <span title="Verified Provider" className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                  Verified
+                              </span>
+                          )}
+                          <div className="text-base font-medium leading-none text-slate-800">{currentUser.name}</div>
+                      </div>
+                      <div className="text-sm font-medium leading-none text-slate-500">{currentUser.email}</div>
                     </div>
                 </div>
                 <div className="mt-3 px-2 space-y-1">

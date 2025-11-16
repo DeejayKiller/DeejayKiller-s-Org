@@ -9,6 +9,9 @@ import Header from './components/layout/Header';
 import CustomerDashboard from './components/dashboards/CustomerDashboard';
 import ProviderDashboard from './components/dashboards/ProviderDashboard';
 import LandingPage from './components/auth/LandingPage';
+import GDPR from './components/legal/GDPR';
+
+type View = 'landing' | 'login' | 'register' | 'gdpr';
 
 export const AppContext = React.createContext<{
   currentUser: User | null;
@@ -21,6 +24,7 @@ export const AppContext = React.createContext<{
   updateJob: (updatedJob: Job) => void;
   submitReview: (jobId: number, reviewerId: number, rating: number, reviewText: string) => void;
   findUserById: (id: number) => User | undefined;
+  setView: (view: View) => void;
 }>({
   currentUser: null,
   users: [],
@@ -32,13 +36,14 @@ export const AppContext = React.createContext<{
   updateJob: () => {},
   submitReview: () => {},
   findUserById: () => undefined,
+  setView: () => {},
 });
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS);
-  const [currentView, setCurrentView] = useState<'landing' | 'login' | 'register'>('landing');
+  const [currentView, setCurrentView] = useState<View>('landing');
 
   const appContextValue = useMemo(() => ({
     currentUser,
@@ -122,9 +127,14 @@ const App: React.FC = () => {
         }
     },
     findUserById: (id: number) => users.find(u => u.id === id),
+    setView: setCurrentView,
   }), [currentUser, users, jobs]);
 
   const renderContent = () => {
+    if (currentView === 'gdpr') {
+        return <GDPR onBack={() => setCurrentView('landing')} />;
+    }
+      
     if (currentUser) {
       if (currentUser.userType === UserType.Customer) {
         return <CustomerDashboard />;
