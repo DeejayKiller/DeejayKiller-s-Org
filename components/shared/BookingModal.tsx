@@ -28,7 +28,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
 
 
   const selectedService = CLEANING_SERVICES.find(s => s.name === serviceType);
-  const price = selectedService ? selectedService.price : 0;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,11 +41,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
         alert("Please provide an address.");
         return;
     }
-    const newJob: Omit<Job, 'id' | 'status' | 'customerId'> = {
+    const newJob: Omit<Job, 'id' | 'status' | 'customerId' | 'price'> = {
         serviceType,
         address,
         dateTime: new Date(`${date}T${time}`),
-        price,
         paymentMethod,
         imageFile
     };
@@ -58,7 +56,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg relative animate-fade-in-up">
         <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
-        <h2 className="text-2xl font-bold mb-6 text-slate-800">Book a Cleaning Service</h2>
+        <h2 className="text-2xl font-bold mb-6 text-slate-800">Request a Cleaning Service</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="serviceType" className="block text-sm font-medium text-slate-700">Service Type</label>
@@ -98,9 +96,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ onClose }) => {
                 ))}
             </div>
           </div>
-          <div className="pt-4 flex justify-between items-center">
-            <p className="text-2xl font-bold text-slate-900">${price.toFixed(2)}</p>
-            <button type="submit" className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Confirm Booking</button>
+          <div className="pt-4 flex justify-end items-center">
+            <button type="submit" className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Post Job Request</button>
           </div>
         </form>
       </div>

@@ -32,7 +32,7 @@ const ServicesPage: React.FC = () => {
                             </div>
                             <div className="mt-4 pt-4 border-t border-slate-200">
                                 <div className="flex justify-between items-center">
-                                    <p className="text-2xl font-bold text-slate-900">${service.price.toFixed(2)}</p>
+                                    <p className="text-lg font-semibold text-slate-500">Request a Quote</p>
                                     {currentUser?.userType === UserType.Customer && (
                                          <button
                                              onClick={() => handleBookNow(service.name)}

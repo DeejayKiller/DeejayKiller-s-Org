@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import type { Job, User } from './types';
-import { AppContext, View, JobStatus, UserType, VerificationStatus } from './types';
-import { MOCK_JOBS, MOCK_USERS } from './constants';
+import type { Job, User, Offer } from './types';
+import { AppContext, View, JobStatus, UserType, VerificationStatus, OfferStatus } from './types';
+import { MOCK_JOBS, MOCK_USERS, MOCK_OFFERS } from './constants';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Header from './components/layout/Header';
@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS);
+  const [offers, setOffers] = useState<Offer[]>(MOCK_OFFERS);
   const [currentView, setCurrentView] = useState<View>('landing');
   const [bookingService, setBookingService] = useState<string | null>(null);
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
     currentUser,
     users,
     jobs,
+    offers,
     login: (email: string) => {
       const user = users.find(u => u.email === email);
       if (user) {
@@ -48,7 +50,7 @@ const App: React.FC = () => {
       setUsers(prev => [...prev, newUser]);
       setCurrentUser(newUser);
     },
-    createJob: (job: Omit<Job, 'id' | 'status' | 'customerId'>) => {
+    createJob: (job: Omit<Job, 'id' | 'status' | 'customerId' | 'price'>) => {
       if (!currentUser) return;
       const newJob: Job = {
         ...job,
@@ -66,6 +68,36 @@ const App: React.FC = () => {
         if (currentUser && currentUser.id === updatedUser.id) {
             setCurrentUser(updatedUser);
         }
+    },
+    createOffer: (jobId: number, price: number) => {
+        if (!currentUser || currentUser.userType !== UserType.Provider) return;
+        const newOffer: Offer = {
+            id: offers.length + 1,
+            jobId,
+            providerId: currentUser.id,
+            price,
+            status: OfferStatus.Pending,
+        };
+        setOffers(prev => [...prev, newOffer]);
+    },
+    acceptOffer: (offerId: number) => {
+        const acceptedOffer = offers.find(o => o.id === offerId);
+        if (!acceptedOffer) return;
+
+        // Update the job
+        setJobs(prevJobs => prevJobs.map(job => 
+            job.id === acceptedOffer.jobId 
+            ? { ...job, providerId: acceptedOffer.providerId, price: acceptedOffer.price, status: JobStatus.Accepted } 
+            : job
+        ));
+
+        // Update offers for this job
+        setOffers(prevOffers => prevOffers.map(offer => {
+            if (offer.jobId === acceptedOffer.jobId) {
+                return { ...offer, status: offer.id === offerId ? OfferStatus.Accepted : OfferStatus.Rejected };
+            }
+            return offer;
+        }));
     },
     submitReview: (jobId: number, reviewerId: number, rating: number, reviewText: string) => {
         const jobToUpdate = jobs.find(j => j.id === jobId);
@@ -106,7 +138,7 @@ const App: React.FC = () => {
     setView: setCurrentView,
     bookingService,
     setBookingService,
-  }), [currentUser, users, jobs, bookingService]);
+  }), [currentUser, users, jobs, offers, bookingService]);
 
   const renderContent = () => {
     switch (currentView) {

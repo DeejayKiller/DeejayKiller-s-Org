@@ -27,6 +27,21 @@ export enum VerificationStatus {
     Rejected,
 }
 
+export enum OfferStatus {
+    Pending,
+    Accepted,
+    Rejected,
+}
+
+export interface Offer {
+    id: number;
+    jobId: number;
+    providerId: number;
+    price: number;
+    status: OfferStatus;
+}
+
+
 export interface PaymentInfo {
     type: PaymentMethod;
     details: string; // e.g. "Visa **** 1234" or "user@paypal.com"
@@ -53,7 +68,7 @@ export interface Job {
   serviceType: string;
   address: string;
   dateTime: Date;
-  price: number;
+  price?: number;
   status: JobStatus;
   paymentMethod: PaymentMethod;
   customerRating?: number;
@@ -69,10 +84,11 @@ export const AppContext = React.createContext<{
   currentUser: User | null;
   users: User[];
   jobs: Job[];
+  offers: Offer[];
   login: (email: string) => void;
   logout: () => void;
   register: (user: Omit<User, 'id' | 'avgRating' | 'ratingsCount' | 'verificationStatus' | 'isAvailable'>) => void;
-  createJob: (job: Omit<Job, 'id' | 'status' | 'customerId'>) => void;
+  createJob: (job: Omit<Job, 'id' | 'status' | 'customerId' | 'price'>) => void;
   updateJob: (updatedJob: Job) => void;
   submitReview: (jobId: number, reviewerId: number, rating: number, reviewText: string) => void;
   findUserById: (id: number) => User | undefined;
@@ -80,10 +96,13 @@ export const AppContext = React.createContext<{
   updateUser: (updatedUser: User) => void;
   bookingService: string | null;
   setBookingService: (serviceName: string | null) => void;
+  createOffer: (jobId: number, price: number) => void;
+  acceptOffer: (offerId: number) => void;
 }>({
   currentUser: null,
   users: [],
   jobs: [],
+  offers: [],
   login: () => {},
   logout: () => {},
   register: () => {},
@@ -95,4 +114,6 @@ export const AppContext = React.createContext<{
   updateUser: () => {},
   bookingService: null,
   setBookingService: () => {},
+  createOffer: () => {},
+  acceptOffer: () => {},
 });
