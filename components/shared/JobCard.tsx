@@ -21,6 +21,11 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
   
   const isProvider = currentUser.userType === UserType.Provider;
   
+  /**
+   * Handles a provider accepting a job.
+   * This action is restricted to verified providers via the button's disabled state.
+   * It updates the job status to 'Accepted' and assigns the current user as the provider.
+   */
   const handleAccept = () => {
     if(!currentUser.isVerified) {
         alert("You must be a verified provider to accept jobs.");
@@ -28,7 +33,15 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
     }
     updateJob({ ...job, status: JobStatus.Accepted, providerId: currentUser.id })
   };
-  const handleComplete = () => updateJob({ ...job, status: JobStatus.Completed });
+
+  /**
+   * Handles subsequent status updates by the provider.
+   * @param newStatus The new status to set for the job.
+   */
+  const handleUpdateStatus = (newStatus: JobStatus) => {
+    updateJob({ ...job, status: newStatus });
+  };
+
 
   const getStatusInfo = (status: JobStatus): { text: string; color: string } => {
     switch (status) {
@@ -46,7 +59,8 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
   const renderActions = () => {
     if (isProvider) {
       if (job.status === JobStatus.Pending) return <button onClick={handleAccept} className="w-full mt-4 px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-slate-400" disabled={!currentUser.isVerified}>Accept Job</button>;
-      if (job.status === JobStatus.Accepted) return <button onClick={handleComplete} className="w-full mt-4 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">Mark as Complete</button>;
+      if (job.status === JobStatus.Accepted) return <button onClick={() => handleUpdateStatus(JobStatus.InProgress)} className="w-full mt-4 px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Start Job</button>;
+      if (job.status === JobStatus.InProgress) return <button onClick={() => handleUpdateStatus(JobStatus.Completed)} className="w-full mt-4 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">Mark as Complete</button>;
       if ((job.status === JobStatus.Completed || job.status === JobStatus.Reviewed) && !job.customerRating) return <button onClick={() => setIsReviewModalOpen(true)} className="w-full mt-4 px-4 py-2 text-white bg-purple-600 rounded-md hover:bg-purple-700">Review Customer</button>;
     } else { // Is Customer
         if ((job.status === JobStatus.Completed || job.status === JobStatus.Reviewed) && !job.providerRating) return <button onClick={() => setIsReviewModalOpen(true)} className="w-full mt-4 px-4 py-2 text-white bg-purple-600 rounded-md hover:bg-purple-700">Review Provider</button>;
