@@ -56,12 +56,22 @@ export const MOCK_JOBS: Job[] = [
     price: 60,
     status: JobStatus.Completed,
     paymentMethod: PaymentMethod.Cash
+  },
+  {
+    id: 5,
+    customerId: 1,
+    serviceType: 'Carpet Cleaning',
+    address: '123 Main St, Anytown, USA',
+    dateTime: new Date(new Date().setDate(new Date().getDate() + 1)),
+    status: JobStatus.Pending,
+    paymentMethod: PaymentMethod.Card,
   }
 ];
 
 export const MOCK_OFFERS: Offer[] = [
     { id: 1, jobId: 2, providerId: 2, price: 140, status: OfferStatus.Pending },
-    { id: 2, jobId: 2, providerId: 5, price: 165, status: OfferStatus.Pending }, // Note: provider 5 is 'Rejected' verification, UI should handle this
+    { id: 2, jobId: 2, providerId: 5, price: 165, status: OfferStatus.Pending },
+    { id: 3, jobId: 5, providerId: 2, price: 85, status: OfferStatus.Pending },
 ];
 
 
@@ -81,7 +91,6 @@ export const CLEANING_SERVICES = [
     { name: 'Window Cleaning', description: "Interior and exterior window washing for a streak-free shine." },
     { name: 'Carpet Cleaning', description: "Deep steam cleaning for carpets to remove stains and allergens." },
     { name: 'Upholstery Cleaning', description: "Cleaning for sofas, chairs, and other upholstered furniture." },
-    // FIX: Corrected typo 'name:t' to 'name'
     { name: "Post-Construction Cleaning", description: "Cleaning up dust and debris after construction or renovation projects." },
     { name: 'Eco-Friendly Cleaning', description: "Cleaning using only environmentally safe and non-toxic products." },
     { name: 'Event Clean-Up', description: "Cleaning services before and after parties, weddings, or corporate events." },

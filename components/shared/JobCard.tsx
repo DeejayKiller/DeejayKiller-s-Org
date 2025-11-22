@@ -81,33 +81,50 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
   )
   
   const renderOffers = () => {
-      if (currentUser.userType !== UserType.Customer || job.status !== JobStatus.Pending || jobOffers.length === 0) {
+      if (currentUser.userType !== UserType.Customer || job.status !== JobStatus.Pending) {
           return null;
       }
       return (
-        <div className="mt-4 space-y-2">
-            <h4 className="text-sm font-semibold text-slate-700">Provider Offers:</h4>
-            {jobOffers.map(offer => {
-                const offerProvider = findUserById(offer.providerId);
-                if (!offerProvider) return null;
-                return (
-                    <div key={offer.id} className="flex justify-between items-center p-2 bg-slate-50 rounded-md border">
-                        <div>
-                            <p className="font-semibold text-sm">{offerProvider.name}</p>
-                            <div className="flex items-center gap-1">
-                                <StarRating rating={offerProvider.avgRating} size="small" />
-                                <span className="text-xs text-slate-500">({offerProvider.ratingsCount})</span>
+        <div className="mt-4 space-y-3 border-t pt-3 border-slate-200">
+            <h4 className="text-sm font-bold text-slate-800">Incoming Offers</h4>
+            {jobOffers.length === 0 ? (
+                <div className="bg-slate-50 p-4 rounded-lg text-center border border-slate-100">
+                    <p className="text-sm text-slate-500 italic">Waiting for offers from verified providers...</p>
+                    <p className="text-xs text-slate-400 mt-1">Providers will check your job soon.</p>
+                </div>
+            ) : (
+                <div className="space-y-2">
+                    {jobOffers.map(offer => {
+                        const offerProvider = findUserById(offer.providerId);
+                        if (!offerProvider) return null;
+                        return (
+                            <div key={offer.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-sm text-slate-800">{offerProvider.name}</p>
+                                        {offerProvider.verificationStatus === VerificationStatus.Verified && (
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-blue-500">
+                                                <title>Verified Provider</title>
+                                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.491 4.491 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <StarRating rating={offerProvider.avgRating} size="small" />
+                                        <span className="text-xs text-slate-500">({offerProvider.ratingsCount} reviews)</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-lg text-slate-900">£{offer.price.toFixed(2)}</p>
+                                     <button onClick={() => acceptOffer(offer.id)} className="mt-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-md transition-colors shadow-sm">
+                                        Accept
+                                     </button>
+                                </div>
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="font-bold text-lg text-slate-800">£{offer.price.toFixed(2)}</p>
-                             <button onClick={() => acceptOffer(offer.id)} className="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded-md">
-                                Accept
-                             </button>
-                        </div>
-                    </div>
-                )
-            })}
+                        )
+                    })}
+                </div>
+            )}
         </div>
       );
   }
